@@ -170,7 +170,11 @@ module.exports = async (req, res) => {
         body: JSON.stringify({
           member_id: memberId,
           slot: 3,
-          expires_at: '2126-01-01T00:00:00.000Z',
+          // Masa aktif sementara saat ditandai IB. Nilai aslinya akan ditulis
+          // ulang oleh 'ibaccept' sesuai pilihan durasi admin. Jangan hardcode
+          // tanggal jauh (2126) — kalau salah klik Accept tidak jalan, dashboard
+          // sempat menampilkan tanggal yang menyesatkan.
+          expires_at: new Date(Date.now() + 7*24*60*60*1000).toISOString(),
           is_active: false,
           account_number: null,
         }),
