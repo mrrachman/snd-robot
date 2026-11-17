@@ -168,6 +168,7 @@ module.exports = async (req, res) => {
     // ---------- IB: verifikasi & accept (nyalakan lisensi) ----------
     if (action === 'ibaccept') {
       const memberId = body.memberId;
+      const days     = parseInt(body.days, 10) || 7;   // default 7 hari
       if (!memberId) return res.status(400).json({ error: 'Data tidak lengkap' });
 
       const cek = await fetch(
@@ -187,7 +188,8 @@ module.exports = async (req, res) => {
         headers: H,
         body: JSON.stringify({
           is_active: true,
-          expires_at: '2126-01-01T00:00:00.000Z',
+          // Masa aktif jalur IB: sesuai pilihan admin (default 7 hari), bukan lifetime.
+          expires_at: new Date(Date.now() + days*24*60*60*1000).toISOString(),
           activated_at: new Date().toISOString(),
         }),
       });

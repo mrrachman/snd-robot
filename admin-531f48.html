@@ -187,7 +187,9 @@ async function acceptIB(memberId, rowId) {
   if(!confirm('Sudah kamu cek di portal IB Vantage?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode referral mrrsnd88 sebelum Accept.')) return;
   const msgEl = document.getElementById('rowmsg_'+rowId);
   if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
-  const r = await api('ibaccept', { memberId });
+  const durEl = document.getElementById('ibdur_'+rowId);
+  const days  = durEl ? parseInt(durEl.value, 10) : 7;
+  const r = await api('ibaccept', { memberId, days });
   if(r.ok){
     if(msgEl){ msgEl.textContent='Lisensi IB aktif ✓'; msgEl.style.color='#00c896'; }
     setTimeout(loadMembers, 700);
@@ -302,7 +304,14 @@ async function loadMembers() {
               : ibState === 'aktif'
                 ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed">IB Aktif</button>`
                 : ibState === 'siap'
-                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
+                  ? `<select id="ibdur_${rowId}" class="dur-select" style="padding:6px;border-radius:8px;background:#111;color:#eee;border:1px solid #333">
+                       <option value="7" selected>7 Hari</option>
+                       <option value="30">30 Hari</option>
+                       <option value="90">3 Bulan</option>
+                       <option value="365">1 Tahun</option>
+                       <option value="36500">Lifetime</option>
+                     </select>
+                     <button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
                      <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
                   : `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
                      <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
