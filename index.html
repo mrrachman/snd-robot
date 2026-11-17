@@ -40,6 +40,15 @@
   .hero-caption{position:absolute;z-index:3;bottom:13px;left:16px;font-size:11px;color:#b6b0a4;letter-spacing:.04em;text-shadow:0 1px 4px #000}
   @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:36px}.hero-copy{max-width:720px}.hero-visual{max-width:720px;width:100%;min-height:0;margin:0 auto;transform:none}.hero-visual img{width:166%;transform:translateX(-40%)}}
   @media(max-width:560px){.hero{padding-top:58px}.hero-visual{aspect-ratio:1.16/1}.hero-visual:before{top:12px;right:12px;font-size:9px}.hero-caption{left:12px;bottom:10px}}
+  .hero-stack{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;text-align:center}
+  .hero-stack .hero-copy{max-width:900px}
+  .hero-stack h1{max-width:900px;margin:0 auto}
+  .hero-stack .hero-visual{width:min(920px,100%);aspect-ratio:16/8.7;min-height:0;margin:34px auto 0;transform:none}
+  .hero-stack .hero-visual img{width:100%;height:100%;object-fit:cover;object-position:center}
+  .hero-stack .hero-after-visual{max-width:680px;margin-top:28px}
+  .hero-stack .sub{margin:0 auto 28px}
+  .hero-stack .ctas{justify-content:center}
+  .hero-stack .ticker{width:100%;text-align:left}
   .hero::before{content:"";position:absolute;inset:0;background:
     radial-gradient(600px 300px at 85% 10%, rgba(201,168,76,.09), transparent 60%),
     radial-gradient(500px 260px at 5% 90%, rgba(201,168,76,.05), transparent 60%);pointer-events:none}
@@ -133,19 +142,21 @@
   </div>
 </div></nav>
 
-<header class="hero"><div class="wrap hero-grid">
+<header class="hero"><div class="wrap hero-stack">
   <div class="hero-copy">
     <div class="kick"><span class="dot"></span> AKSES GRATIS TERBATAS &middot; klaim sebelum ditutup</div>
     <h1>Robot XAUUSD yang<span class="g"> kerja 24 jam</span>,<br>sekarang bisa kamu coba <span class="g">gratis.</span></h1>
+  </div>
+  <div class="hero-visual">
+    <img src="hero-performance.png" alt="Dashboard performa trading algoritmik XAUUSD">
+    <div class="hero-caption">Contoh tampilan performa trading algoritmik</div>
+  </div>
+  <div class="hero-copy hero-after-visual">
     <p class="sub">SND ROBOT membaca <b>zona supply & demand</b> di chart, menunggu harga kembali ke zona, lalu entry otomatis — lengkap dengan <b>lot penyelamat</b>, <b>cutloss EMA</b>, dan <b>proteksi drawdown</b>. <b>Daftar sekarang untuk mengunci akses gratis.</b></p>
     <div class="ctas">
       <a class="btn btn-gold" href="ib.html">Klaim Akses Gratis <small>langkah pendaftaran di sini</small></a>
       <a class="btn btn-ghost" href="login.html">Sudah punya akun</a>
     </div>
-  </div>
-  <div class="hero-visual">
-    <img src="hero-performance.png" alt="Dashboard performa trading algoritmik XAUUSD">
-    <div class="hero-caption">Contoh tampilan performa trading algoritmik</div>
   </div>
   <div class="ticker"><div class="tin">
     <span>XAUUSD <b>otomatis</b></span><span>Entry <b>zona SND</b></span><span>Rescue <b>martingale</b></span><span>Cutloss <b>EMA200</b></span><span>TP <b>rata-rata basket</b></span><span>Proteksi <b>drawdown</b></span><span>Full <b>MT5</b></span>
