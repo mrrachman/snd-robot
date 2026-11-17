@@ -184,11 +184,10 @@ function setIBAccount(memberId, rowId) {
 }
 
 async function acceptIB(memberId, rowId) {
-  if(!confirm('Sudah kamu cek di portal IB Vantage?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode referral mrrsnd88 sebelum Accept.')) return;
+  const days = parseInt(document.getElementById('dur_'+rowId).value) || 7;
+  if(!confirm('Verifikasi & aktifkan jalur IB?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode referral mrrsnd88.\n\nMasa aktif sesuai pilihan di dropdown (default 7 hari).')) return;
   const msgEl = document.getElementById('rowmsg_'+rowId);
   if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
-  const durEl = document.getElementById('ibdur_'+rowId);
-  const days  = durEl ? parseInt(durEl.value, 10) : 7;
   const r = await api('ibaccept', { memberId, days });
   if(r.ok){
     if(msgEl){ msgEl.textContent='Lisensi IB aktif ✓'; msgEl.style.color='#00c896'; }
@@ -242,11 +241,14 @@ async function loadMembers() {
     let ibCell  = '<span style="color:#555">—</span>';
     let ibState = 'none';
     if(lic3) {
-      if(lic3.is_active)          ibState = 'aktif';
-      else if(lic3.account_number) ibState = 'siap';
-      else                         ibState = 'kosong';
-      const lbl = ibState === 'aktif' ? 'AKTIF' : ibState === 'siap' ? 'SIAP ACC' : 'ISI AKUN';
-      const cls = ibState === 'aktif' ? 'active' : ibState === 'siap' ? 'expired' : 'inactive';
+      const ibExpired = (new Date(lic3.expires_at) < now);
+      if(lic3.is_active && !ibExpired)      ibState = 'aktif';
+      else if(lic3.is_active && ibExpired)  ibState = 'kedaluwarsa';
+      else if(lic3.account_number)          ibState = 'siap';
+      else                                  ibState = 'kosong';
+      const lbl = ibState === 'aktif' ? 'AKTIF' : ibState === 'kedaluwarsa' ? 'IB EXPIRED'
+                : ibState === 'siap' ? 'SIAP ACC' : 'ISI AKUN';
+      const cls = ibState === 'aktif' ? 'active' : (ibState === 'siap' || ibState === 'kedaluwarsa') ? 'expired' : 'inactive';
       ibCell = `<span class="badge ${cls}">${lbl}</span>`;
     }
     let expStr = '—', statusHtml = '<span class="badge inactive">NO LICENSE</span>';
@@ -259,6 +261,15 @@ async function loadMembers() {
       if(isLifetime) expStr = 'Lifetime';
       statusKey = expDate < now ? 'expired' : lic1.is_active ? 'active' : 'inactive';
       const label = statusKey === 'active' ? 'AKTIF' : statusKey === 'expired' ? 'EXPIRED' : 'NONAKTIF';
+      statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
+    } else if(lic3 && lic3.is_active) {
+      // jalur IB — tampilkan tanggal berakhirnya (bukan lifetime)
+      const ibExp = new Date(lic3.expires_at);
+      expStr = ibExp.toLocaleDateString('id-ID');
+      isLifetime = (ibExp - now) > (10 * 365 * 24 * 60 * 60 * 1000);
+      if(isLifetime) expStr = 'Lifetime';
+      statusKey = ibExp < now ? 'expired' : 'active';
+      const label = statusKey === 'active' ? 'AKTIF (IB)' : 'EXPIRED (IB)';
       statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
     }
 
@@ -303,15 +314,11 @@ async function loadMembers() {
               ? `<button class="btn-ib" onclick="markIB('${m.id}','${rowId}')">Centang IB</button>`
               : ibState === 'aktif'
                 ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed">IB Aktif</button>`
+                : ibState === 'kedaluwarsa'
+                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Perpanjang IB</button>
+                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan</button>`
                 : ibState === 'siap'
-                  ? `<select id="ibdur_${rowId}" class="dur-select" style="padding:6px;border-radius:8px;background:#111;color:#eee;border:1px solid #333">
-                       <option value="7" selected>7 Hari</option>
-                       <option value="30">30 Hari</option>
-                       <option value="90">3 Bulan</option>
-                       <option value="365">1 Tahun</option>
-                       <option value="36500">Lifetime</option>
-                     </select>
-                     <button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
+                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
                      <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
                   : `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
                      <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
