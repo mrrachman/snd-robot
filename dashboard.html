@@ -179,6 +179,22 @@ async function loadLicense() {
     const lic3 = data.find(l => l.slot === 3);
     const now  = new Date();
 
+    /* ---------- STATUS LISENSI (berlaku untuk SEMUA jalur) ---------- */
+    // Ambil lisensi yang berlaku: slot 1/2 kalau ada, kalau tidak slot 3 (IB).
+    const licMain = lic1 || lic2 || lic3;
+    if(licMain) {
+      const exp        = new Date(licMain.expires_at);
+      const isExpired  = exp < now;
+      const isLifetime = (exp - now) > (10 * 365 * 24 * 60 * 60 * 1000);
+      const isActive   = !isExpired && licMain.is_active;
+      const stat       = isExpired ? 'expired' : isActive ? 'active' : 'inactive';
+      const lbl        = stat === 'active' ? 'AKTIF' : stat === 'expired' ? 'EXPIRED' : 'NONAKTIF';
+      document.getElementById('statusBadge').innerHTML = `<span class="badge ${stat}">${lbl}</span>`;
+      document.getElementById('expiresAt').textContent = isLifetime ? 'Lifetime' : exp.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+      if(lic1) document.getElementById('acc1').textContent = lic1.account_number || '—';
+      if(lic2) document.getElementById('acc2').textContent = lic2.account_number || '—';
+    }
+
     /* ---------- JALUR IB (slot 3) ---------- */
     const ibCard = document.getElementById('ibCard');
     if(lic3) {
@@ -226,18 +242,11 @@ async function loadLicense() {
       ibCard.style.display = 'none';
     }
 
+    // Jalur berbayar (slot 1/2): tombol download + kartu slot.
     if(lic1) {
-      const exp        = new Date(lic1.expires_at);
-      const isExpired  = exp < now;
-      const isLifetime = (exp - now) > (10 * 365 * 24 * 60 * 60 * 1000);
-      const isActive   = !isExpired && lic1.is_active;
-      const status     = isExpired ? 'expired' : isActive ? 'active' : 'inactive';
-      const label      = status === 'active' ? 'AKTIF' : status === 'expired' ? 'EXPIRED' : 'NONAKTIF';
-
-      document.getElementById('statusBadge').innerHTML = `<span class="badge ${status}">${label}</span>`;
-      document.getElementById('expiresAt').textContent = isLifetime ? 'Lifetime' : exp.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
-      document.getElementById('acc1').textContent = lic1.account_number || '—';
-      if(lic2) document.getElementById('acc2').textContent = lic2.account_number || '—';
+      const exp       = new Date(lic1.expires_at);
+      const isExpired = exp < now;
+      const isActive  = !isExpired && lic1.is_active;
 
       if(isActive) {
         dlRow.style.display = 'flex';
