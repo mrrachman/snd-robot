@@ -257,6 +257,12 @@ async function loadMembers() {
     // Status utama: pakai lisensi yang BENAR-BENAR aktif.
     // Jalur IB (slot 3) diprioritaskan karena slot 1/2 di-nonaktifkan saat pindah jalur.
     const lic3Active = !!(lic3 && lic3.is_active);
+    // "Jalur berbayar masih aktif" = ada slot 1/2 yang is_active DAN belum kadaluarsa.
+    // Setelah Revoke, barisnya masih ada tapi is_active=false -> harus dianggap bebas,
+    // supaya tombol "Centang IB" muncul lagi.
+    const bayarAktif = [lic1, lic2].some(l => l && l.is_active && new Date(l.expires_at) > now);
+    // Ada baris slot 1/2 (aktif atau sisa revoke) -> admin perlu jalan membersihkan.
+    const adaBarisBayar = !!(lic1 || lic2);
     if(lic3Active) {
       const ibExp = new Date(lic3.expires_at);
       expStr = ibExp.toLocaleDateString('id-ID');
@@ -322,10 +328,11 @@ async function loadMembers() {
             ? `<button class="btn-followup" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Aktif</button>`
             : `<button class="btn-followup-payment" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Pembayaran</button>`
           }
-          ${!isIB && (lic1 || lic2)
+          ${!isIB && bayarAktif
             ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed" title="Sudah jalur berbayar">Jalur Berbayar</button>`
             : !isIB
-              ? `<button class="btn-ib" onclick="markIB('${m.id}','${rowId}')">Centang IB</button>`
+              ? `<button class="btn-ib" onclick="markIB('${m.id}','${rowId}')">Centang IB</button>
+                 ${adaBarisBayar ? `<button class="btn-ib-reject" onclick="clearPaid('${m.id}')">Hapus Sisa Berbayar</button>` : ''}`
               : ibState === 'kosong'
                 ? `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
                    <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
@@ -393,6 +400,15 @@ async function revokeLicense(memberId) {
   const r = await api('revoke', {memberId:memberId});
   if(r.ok) { alert('Lisensi berhasil di-revoke!'); loadMembers(); }
   else { alert('Gagal revoke: ' + (r.data.error||'')); }
+}
+
+// Bersihkan sisa baris slot 1 & 2 (mis. setelah Revoke) supaya member bisa
+// pindah ke jalur IB tanpa terhalang "sudah jalur berbayar".
+async function clearPaid(memberId) {
+  if(!confirm('Hapus baris jalur berbayar (slot 1 & 2) member ini?\n\nPakai ini kalau mau memindahkan member ke jalur IB.')) return;
+  const r = await api('clearpaid', {memberId:memberId});
+  if(r.ok) { alert('Jalur berbayar dibersihkan. Sekarang bisa Centang IB.'); loadMembers(); }
+  else { alert('Gagal: ' + (r.data.error||'')); }
 }
 
 // Auto-login kalau password masih ada di sesi tab ini

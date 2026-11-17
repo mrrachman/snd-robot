@@ -263,6 +263,21 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     }
 
+    // ---------- bersihkan jalur berbayar (slot 1 & 2) ----------
+    // Dipakai saat memindahkan member dari jalur berbayar ke jalur IB.
+    // Revoke hanya mematikan baris; baris itu masih "ada" dan dulu membuat
+    // tombol "Centang IB" tidak muncul. Aksi ini menghapus barisnya.
+    if (action === 'clearpaid') {
+      const memberId = body.memberId;
+      if (!memberId) return res.status(400).json({ error: 'Data tidak lengkap' });
+
+      const r = await fetch(`${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=in.(1,2)`, {
+        method: 'DELETE', headers: H,
+      });
+      if (!r.ok) return res.status(502).json({ error: 'Gagal membersihkan jalur berbayar' });
+      return res.status(200).json({ ok: true });
+    }
+
     // ---------- hapus member + lisensinya ----------
     if (action === 'delete') {
       const memberId = body.memberId;
