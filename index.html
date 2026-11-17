@@ -31,6 +31,12 @@
   @media(max-width:760px){.navlinks a:not(.navcta){display:none}}
   /* HERO */
   .hero{padding:84px 0 64px;position:relative;overflow:hidden}
+  .hero-grid{display:grid;grid-template-columns:minmax(0,1.02fr) minmax(360px,.98fr);gap:42px;align-items:center;position:relative;z-index:1}
+  .hero-copy{min-width:0}
+  .hero-visual{border:1px solid #3d351c;border-radius:18px;padding:8px;background:#0d0d0d;box-shadow:0 18px 60px rgba(0,0,0,.42),0 0 40px rgba(201,168,76,.08);transform:rotate(.35deg)}
+  .hero-visual img{display:block;width:100%;height:auto;border-radius:11px}
+  .hero-caption{font-size:11px;color:#77736b;text-align:center;margin-top:10px;letter-spacing:.04em}
+  @media(max-width:900px){.hero-grid{grid-template-columns:1fr;gap:34px}.hero-visual{max-width:720px;margin:0 auto;transform:none}}
   .hero::before{content:"";position:absolute;inset:0;background:
     radial-gradient(600px 300px at 85% 10%, rgba(201,168,76,.09), transparent 60%),
     radial-gradient(500px 260px at 5% 90%, rgba(201,168,76,.05), transparent 60%);pointer-events:none}
@@ -124,13 +130,19 @@
   </div>
 </div></nav>
 
-<header class="hero"><div class="wrap">
-  <div class="kick"><span class="dot"></span> AKSES GRATIS TERBATAS &middot; klaim sebelum ditutup</div>
-  <h1>Robot XAUUSD yang<span class="g"> kerja 24 jam</span>,<br>sekarang bisa kamu coba <span class="g">gratis.</span></h1>
-  <p class="sub">SND ROBOT membaca <b>zona supply & demand</b> di chart, menunggu harga kembali ke zona, lalu entry otomatis — lengkap dengan <b>lot penyelamat</b>, <b>cutloss EMA</b>, dan <b>proteksi drawdown</b>. <b>Daftar sekarang untuk mengunci akses gratis.</b></p>
-  <div class="ctas">
-    <a class="btn btn-gold" href="ib.html">Klaim Akses Gratis <small>langkah pendaftaran di sini</small></a>
-    <a class="btn btn-ghost" href="login.html">Sudah punya akun</a>
+<header class="hero"><div class="wrap hero-grid">
+  <div class="hero-copy">
+    <div class="kick"><span class="dot"></span> AKSES GRATIS TERBATAS &middot; klaim sebelum ditutup</div>
+    <h1>Robot XAUUSD yang<span class="g"> kerja 24 jam</span>,<br>sekarang bisa kamu coba <span class="g">gratis.</span></h1>
+    <p class="sub">SND ROBOT membaca <b>zona supply & demand</b> di chart, menunggu harga kembali ke zona, lalu entry otomatis — lengkap dengan <b>lot penyelamat</b>, <b>cutloss EMA</b>, dan <b>proteksi drawdown</b>. <b>Daftar sekarang untuk mengunci akses gratis.</b></p>
+    <div class="ctas">
+      <a class="btn btn-gold" href="ib.html">Klaim Akses Gratis <small>langkah pendaftaran di sini</small></a>
+      <a class="btn btn-ghost" href="login.html">Sudah punya akun</a>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <img src="hero-performance.png" alt="Dashboard performa trading algoritmik XAUUSD">
+    <div class="hero-caption">Contoh tampilan performa trading algoritmik</div>
   </div>
   <div class="ticker"><div class="tin">
     <span>XAUUSD <b>otomatis</b></span><span>Entry <b>zona SND</b></span><span>Rescue <b>martingale</b></span><span>Cutloss <b>EMA200</b></span><span>TP <b>rata-rata basket</b></span><span>Proteksi <b>drawdown</b></span><span>Full <b>MT5</b></span>
