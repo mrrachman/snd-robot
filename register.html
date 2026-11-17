@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SND ROBOT — Register</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0f0f0f; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:40px; width:100%; max-width:420px; }
+  h1 { font-size:22px; color:#00c896; margin-bottom:4px; }
+  p.sub { color:#888; font-size:13px; margin-bottom:28px; }
+  label { display:block; font-size:12px; color:#aaa; margin-bottom:6px; }
+  input { width:100%; padding:10px 14px; background:#111; border:1px solid #333; border-radius:8px; color:#fff; font-size:14px; margin-bottom:16px; outline:none; }
+  input:focus { border-color:#00c896; }
+  button { width:100%; padding:12px; background:#00c896; color:#000; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:15px; }
+  button:hover { background:#00a87e; }
+  .msg { margin-top:16px; font-size:13px; text-align:center; }
+  .err { color:#ff4d4d; }
+  .ok  { color:#00c896; }
+  .link { margin-top:16px; text-align:center; font-size:13px; color:#888; }
+  .link a { color:#00c896; text-decoration:none; }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>SND ROBOT</h1>
+  <p class="sub">Buat Akun Baru</p>
+  <label>Nama Lengkap</label>
+  <input type="text" id="nama" placeholder="Nama kamu">
+  <label>Nomor WhatsApp</label>
+  <input type="text" id="wa" placeholder="628xxxxxxxxxx">
+  <label>Email</label>
+  <input type="email" id="email" placeholder="email@example.com">
+  <label>Password</label>
+  <input type="password" id="password" placeholder="Min. 6 karakter">
+  <button onclick="doRegister()">Daftar</button>
+  <div class="msg" id="msg"></div>
+  <div class="link">Sudah punya akun? <a href="login.html">Login</a></div>
+</div>
+<script>
+const SUPA_URL = 'https://nkeytmarkudwzilkmfde.supabase.co';
+const SUPA_KEY = 'ISI_KUNCI_PUBLISHABLE';
+
+async function doRegister() {
+  const nama  = document.getElementById('nama').value.trim();
+  const wa    = document.getElementById('wa').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('password').value;
+  const msg   = document.getElementById('msg');
+
+  if(!nama || !wa || !email || !pass) {
+    msg.textContent = 'Semua field wajib diisi'; msg.className = 'msg err'; return;
+  }
+
+  msg.textContent = 'Loading...'; msg.className = 'msg';
+
+  const res = await fetch(`${SUPA_URL}/auth/v1/signup`, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
+    body: JSON.stringify({
+      email, password:pass,
+      data: { nama, wa }
+    })
+  });
+  const data = await res.json();
+  if(data.id || data.user) {
+    msg.innerHTML = `
+      <div style="color:#00c896;margin-bottom:16px;">Pendaftaran berhasil!</div>
+      <a href="login.html" style="display:block;padding:10px;background:#00c896;color:#000;font-weight:700;border-radius:8px;text-decoration:none;margin-bottom:10px;">Login Sekarang</a>
+      <a href="https://wa.me/6282344444399?text=${encodeURIComponent(`Halo Admin, saya *${nama}* (${email}) sudah mendaftar MRR Tools. Mohon aktivasi lisensi saya. Terima kasih.`)}" target="_blank" style="display:block;padding:10px;background:#25d366;color:#000;font-weight:700;border-radius:8px;text-decoration:none;">Chat WhatsApp Admin</a>
+    `;
+    msg.className = 'msg';
+    document.querySelector('button').style.display = 'none';
+  } else {
+    msg.textContent = data.msg || data.error_description || 'Gagal mendaftar';
+    msg.className = 'msg err';
+  }
+}
+</script>
+</body>
+</html>

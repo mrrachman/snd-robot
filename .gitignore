@@ -1,0 +1,11 @@
+# jangan pernah push ini
+*.BACKUP*
+*_BACKUP_*
+.env
+.env.*
+!.env.example
+.vercel
+node_modules/
+config.json
+*.ex5
+!EA/*.ex5

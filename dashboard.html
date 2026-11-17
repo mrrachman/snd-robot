@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MRR Trader — Dashboard</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0f0f0f; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
+  .topbar { background:#1a1a1a; border-bottom:1px solid #2a2a2a; padding:16px 24px; display:flex; justify-content:space-between; align-items:center; }
+  .topbar h1 { font-size:18px; color:#00c896; }
+  .topbar span { font-size:13px; color:#888; }
+  .topbar button { background:transparent; border:1px solid #444; color:#aaa; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .topbar button:hover { border-color:#ff4d4d; color:#ff4d4d; }
+  .container { max-width:600px; margin:40px auto; padding:0 20px; }
+  .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:28px; margin-bottom:20px; }
+  .card h2 { font-size:15px; color:#aaa; margin-bottom:20px; text-transform:uppercase; letter-spacing:1px; }
+  .info-row { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #222; }
+  .info-row:last-child { border-bottom:none; }
+  .info-row .lbl { font-size:13px; color:#888; }
+  .info-row .val { font-size:14px; color:#fff; font-weight:600; }
+  .badge { padding:4px 10px; border-radius:20px; font-size:12px; font-weight:700; }
+  .badge.active { background:#00c89622; color:#00c896; }
+  .badge.inactive { background:#ff4d4d22; color:#ff4d4d; }
+  .badge.expired { background:#ff990022; color:#ff9900; }
+  .slot-box { background:#111; border:1px solid #2a2a2a; border-radius:10px; padding:16px; margin-bottom:12px; }
+  .slot-box h3 { font-size:13px; color:#aaa; margin-bottom:12px; text-transform:uppercase; letter-spacing:1px; }
+  .slot-acc { font-size:18px; font-weight:700; color:#00c896; margin-bottom:12px; }
+  input { width:100%; padding:10px 14px; background:#0f0f0f; border:1px solid #333; border-radius:8px; color:#fff; font-size:14px; margin-bottom:10px; outline:none; }
+  input:focus { border-color:#00c896; }
+  .btn-green { width:100%; padding:10px; background:#00c896; color:#000; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:13px; margin-bottom:6px; }
+  .btn-red { width:100%; padding:10px; background:transparent; color:#ff4d4d; font-weight:700; border:1px solid #ff4d4d; border-radius:8px; cursor:pointer; font-size:13px; }
+  .btn-green:hover { background:#00a87e; }
+  .btn-red:hover { background:#ff4d4d22; }
+  .msg { margin-top:8px; font-size:12px; text-align:center; }
+  .err { color:#ff4d4d; } .ok { color:#00c896; }
+  .btn-download { display:inline-block; background:#00c896; color:#000; padding:8px 20px; border-radius:8px; font-weight:700; font-size:13px; text-decoration:none; }
+  .btn-download:hover { background:#00a87e; }
+
+  .pending-box { background:#111; border:1px solid #c9a84c33; border-radius:12px; padding:28px 24px; text-align:center; }
+  .pending-box .pending-title { font-size:16px; font-weight:700; color:#c9a84c; margin-bottom:10px; }
+  .pending-box .pending-desc { font-size:13px; color:#888; line-height:1.7; margin-bottom:20px; }
+  .btn-wa { display:inline-block; background:#25d366; color:#000; padding:10px 24px; border-radius:8px; font-weight:700; font-size:13px; text-decoration:none; }
+  .btn-wa:hover { background:#1db954; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <h1>SND ROBOT</h1>
+  <div>
+    <span id="userEmail"></span>
+    <button onclick="doLogout()" style="margin-left:12px">Logout</button>
+  </div>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>Status Lisensi</h2>
+    <div class="info-row"><span class="lbl">Status</span><span class="val" id="statusBadge">—</span></div>
+    <div class="info-row" id="expiresRow"><span class="lbl">Aktif Sampai</span><span class="val" id="expiresAt">—</span></div>
+    <div class="info-row" id="downloadRow" style="display:none">
+      <span class="lbl">Download EA</span>
+      <span class="val">
+        <a class="btn-download"
+           href="SND_ROBOT_V1.8.0_EMA_CL_DD5_FIX_LICENSED.ex5"
+           download="SND_ROBOT_V1.8.0_EMA_CL_DD5_FIX_LICENSED.ex5">
+          Download SND ROBOT V1.8.0 DISINI
+        </a>
+      </span>
+    </div>
+    <div class="info-row" id="webrequestRow" style="display:none">
+      <span class="lbl">WebRequest MT5</span>
+      <span class="val" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:#888;">https://nkeytmarkudwzilkmfde.supabase.co</span>
+        <button onclick="copyWR()" id="btnCopyWR" style="background:#00c89622;border:1px solid #00c896;color:#00c896;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;">Copy</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="card" id="pendingCard" style="display:none">
+    <div class="pending-box">
+      <div class="pending-title">Menunggu Aktivasi</div>
+      <div class="pending-desc">
+        Akun kamu sudah terdaftar.<br>
+        Lisensi akan diaktifkan oleh admin setelah pembayaran dikonfirmasi.<br><br>
+        Hubungi kami via WhatsApp untuk konfirmasi pembayaran dan aktivasi lisensi.
+      </div>
+      <a class="btn-wa" href="https://wa.me/6282344444399?text=Halo%2C%20saya%20sudah%20daftar%20MRR%20Tools%20dan%20ingin%20konfirmasi%20pembayaran." target="_blank">
+        Chat WhatsApp
+      </a>
+    </div>
+  </div>
+
+  <div id="slotsCard" style="display:none">
+    <div class="card">
+      <h2>Akun MT5</h2>
+      <div class="slot-box">
+        <h3>Slot 1</h3>
+        <div class="slot-acc" id="acc1">—</div>
+        <input type="number" id="input1" placeholder="Account Number MT5">
+        <button class="btn-green" onclick="doActivate(1)">Simpan Slot 1</button>
+        <button class="btn-red" onclick="doDeactivate(1)">Lepas Slot 1</button>
+        <div class="msg" id="msg1"></div>
+      </div>
+      <div class="slot-box">
+        <h3>Slot 2</h3>
+        <div class="slot-acc" id="acc2">—</div>
+        <input type="number" id="input2" placeholder="Account Number MT5">
+        <button class="btn-green" onclick="doActivate(2)">Simpan Slot 2</button>
+        <button class="btn-red" onclick="doDeactivate(2)">Lepas Slot 2</button>
+        <div class="msg" id="msg2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="card" id="ibCard" style="display:none">
+    <h2>Akses Gratis via IB</h2>
+    <div class="info-row"><span class="lbl">Jalur</span><span class="val"><span class="badge active">IB 30586718</span></span></div>
+    <div class="info-row"><span class="lbl">Status</span><span class="val" id="ibStatus">—</span></div>
+    <div class="slot-box" id="ibInputBox" style="display:none">
+      <h3>Nomor Akun Trading</h3>
+      <input type="number" id="ibInput" placeholder="Contoh: 12345678">
+      <button class="btn-green" onclick="doIBSave()">Kirim Nomor Akun</button>
+      <div class="msg" id="ibMsg"></div>
+    </div>
+    <div class="info-row" id="ibLockedRow" style="display:none">
+      <span class="lbl">Nomor Akun</span>
+      <span class="val" id="ibAccLocked" style="font-family:monospace;color:#00c896">—</span>
+    </div>
+
+    <div class="info-row" id="ibDlRow" style="display:none">
+      <span class="lbl">Download EA</span>
+      <span class="val">
+        <a class="btn-download" id="ibDlLink" href="SND_ROBOT_V1.8.0_EMA_CL_DD5_FIX_LICENSED.ex5" download="SND_ROBOT_V1.8.0_EMA_CL_DD5_FIX_LICENSED.ex5">
+          Download SND ROBOT V1.8.0 DISINI
+        </a>
+      </span>
+    </div>
+    <div class="info-row" id="ibWrRow" style="display:none">
+      <span class="lbl">WebRequest MT5</span>
+      <span class="val" style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;color:#888;" id="ibWrUrl">—</span>
+        <button onclick="copyIBWR()" id="btnCopyIBWR" style="background:#00c89622;border:1px solid #00c896;color:#00c896;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:11px;">Copy</button>
+      </span>
+    </div>
+    <div id="ibNote" style="font-size:12px;color:#888;margin-top:12px;line-height:1.6"></div>
+  </div>
+
+<script>
+const SUPA_URL = 'https://nkeytmarkudwzilkmfde.supabase.co';
+const SUPA_KEY = 'ISI_KUNCI_PUBLISHABLE';
+
+const token = localStorage.getItem('token');
+const email = localStorage.getItem('email');
+if(!token) window.location.href = 'login.html';
+document.getElementById('userEmail').textContent = email;
+
+function copyWR() {
+  navigator.clipboard.writeText('https://nkeytmarkudwzilkmfde.supabase.co');
+  const btn = document.getElementById('btnCopyWR');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+async function loadLicense() {
+  const res = await fetch(`${SUPA_URL}/rest/v1/licenses?select=*&order=slot.asc`, {
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token}
+  });
+  const data = await res.json();
+  const dlRow       = document.getElementById('downloadRow');
+  const wrRow       = document.getElementById('webrequestRow');
+  const pendingCard = document.getElementById('pendingCard');
+  const slotsCard   = document.getElementById('slotsCard');
+  const expiresRow  = document.getElementById('expiresRow');
+
+  if(data && data.length > 0) {
+    const lic1 = data.find(l => l.slot === 1);
+    const lic2 = data.find(l => l.slot === 2);
+    const lic3 = data.find(l => l.slot === 3);
+    const now  = new Date();
+
+    /* ---------- JALUR IB (slot 3) ---------- */
+    const ibCard = document.getElementById('ibCard');
+    if(lic3) {
+      ibCard.style.display = 'block';
+      const ibStat = document.getElementById('ibStatus');
+      const ibIn   = document.getElementById('ibInputBox');
+      const ibLk   = document.getElementById('ibLockedRow');
+      const ibNote = document.getElementById('ibNote');
+      if(lic3.is_active) {
+        ibStat.innerHTML = '<span class="badge active">AKTIF</span>';
+        ibIn.style.display = 'none';
+        ibLk.style.display = 'flex';
+        document.getElementById('ibAccLocked').textContent = lic3.account_number || '—';
+        ibNote.innerHTML = 'Lisensi IB kamu <b style="color:#00c896">aktif selamanya</b> selama akun tetap terdaftar di bawah IB <b>30586718</b>.<br><br>Nomor akun <b>terkunci</b> — hubungi admin kalau perlu diubah.';
+        // tampilkan download EA + WebRequest
+        const dlR = document.getElementById('ibDlRow');
+        const wrR = document.getElementById('ibWrRow');
+        dlR.style.display = 'flex';
+        wrR.style.display = 'flex';
+        document.getElementById('ibWrUrl').textContent = SUPA_URL;
+      } else if(lic3.account_number) {
+        ibStat.innerHTML = '<span class="badge expired">MENUNGGU VERIFIKASI</span>';
+        ibIn.style.display = 'none';
+        ibLk.style.display = 'flex';
+        document.getElementById('ibAccLocked').textContent = lic3.account_number;
+        ibNote.innerHTML = 'Nomor akun kamu sudah terkirim. Admin sedang memverifikasi di portal IB.<br><br>Kamu akan bisa memakai EA setelah admin menyetujui.';
+      } else {
+        ibStat.innerHTML = '<span class="badge inactive">ISI NOMOR AKUN</span>';
+        ibIn.style.display = 'block';
+        ibLk.style.display = 'none';
+        ibNote.innerHTML = 'Isi nomor akun trading kamu di bawah ini.<br><br>Pastikan akun itu sudah terdaftar di bawah kode IB <b>30586718</b>. Nomor <b>tidak bisa diganti</b> setelah disetujui admin.';
+      }
+      dlRow.style.display='none'; wrRow.style.display='none';
+      slotsCard.style.display='none'; pendingCard.style.display='none';
+      return;
+    } else {
+      ibCard.style.display = 'none';
+    }
+
+    if(lic1) {
+      const exp        = new Date(lic1.expires_at);
+      const isExpired  = exp < now;
+      const isLifetime = (exp - now) > (10 * 365 * 24 * 60 * 60 * 1000);
+      const isActive   = !isExpired && lic1.is_active;
+      const status     = isExpired ? 'expired' : isActive ? 'active' : 'inactive';
+      const label      = status === 'active' ? 'AKTIF' : status === 'expired' ? 'EXPIRED' : 'NONAKTIF';
+
+      document.getElementById('statusBadge').innerHTML = `<span class="badge ${status}">${label}</span>`;
+      document.getElementById('expiresAt').textContent = isLifetime ? 'Lifetime' : exp.toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'});
+      document.getElementById('acc1').textContent = lic1.account_number || '—';
+      if(lic2) document.getElementById('acc2').textContent = lic2.account_number || '—';
+
+      if(isActive) {
+        dlRow.style.display = 'flex';
+        wrRow.style.display = 'flex';
+        slotsCard.style.display = 'block';
+        pendingCard.style.display = 'none';
+      } else {
+        dlRow.style.display = 'none';
+        wrRow.style.display = 'none';
+        slotsCard.style.display = 'none';
+        pendingCard.style.display = 'block';
+      }
+    }
+  } else {
+    document.getElementById('statusBadge').innerHTML = '<span class="badge inactive">BELUM AKTIF</span>';
+    document.getElementById('expiresAt').textContent = '—';
+    dlRow.style.display = 'none';
+    wrRow.style.display = 'none';
+    slotsCard.style.display = 'none';
+    pendingCard.style.display = 'block';
+  }
+}
+
+async function doActivate(slot) {
+  const acc = document.getElementById('input'+slot).value;
+  const msg = document.getElementById('msg'+slot);
+  if(!acc) { msg.textContent='Masukkan account number dulu'; msg.className='msg err'; return; }
+  msg.textContent='Loading...'; msg.className='msg';
+  const res = await fetch(`${SUPA_URL}/rest/v1/licenses?slot=eq.${slot}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body: JSON.stringify({account_number:parseInt(acc), activated_at:new Date().toISOString()})
+  });
+  if(res.ok) { msg.textContent='Berhasil disimpan!'; msg.className='msg ok'; loadLicense(); }
+  else { msg.textContent='Gagal simpan'; msg.className='msg err'; }
+}
+
+async function doDeactivate(slot) {
+  const msg = document.getElementById('msg'+slot);
+  msg.textContent='Loading...'; msg.className='msg';
+  const res = await fetch(`${SUPA_URL}/rest/v1/licenses?slot=eq.${slot}`, {
+    method:'PATCH',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body: JSON.stringify({account_number:null})
+  });
+  if(res.ok) { msg.textContent='Slot dilepas.'; msg.className='msg ok'; loadLicense(); }
+  else { msg.textContent='Gagal lepas'; msg.className='msg err'; }
+}
+
+
+function copyIBWR() {
+  navigator.clipboard.writeText(SUPA_URL);
+  const btn = document.getElementById('btnCopyIBWR');
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy', 2000);
+}
+
+async function doIBSave() {
+
+  const val = document.getElementById('ibInput').value;
+  const msg = document.getElementById('ibMsg');
+  if(!val) { msg.textContent='Masukkan nomor akun dulu'; msg.className='msg err'; return; }
+  if(!/^[0-9]{6,}$/.test(val)) { msg.textContent='Nomor akun harus angka, minimal 6 digit'; msg.className='msg err'; return; }
+  msg.textContent='Mengirim...'; msg.className='msg';
+  const res = await fetch(`${SUPA_URL}/rest/v1/licenses?slot=eq.3`, {
+    method:'PATCH',
+    headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    body: JSON.stringify({ account_number: parseInt(val), activated_at: new Date().toISOString() })
+  });
+  if(res.ok) { msg.textContent='Terkirim! Menunggu verifikasi admin.'; msg.className='msg ok'; setTimeout(loadLicense, 900); }
+  else { msg.textContent='Gagal kirim. Coba lagi.'; msg.className='msg err'; }
+}
+
+function doLogout() {
+  localStorage.clear();
+  window.location.href = 'login.html';
+}
+
+loadLicense();
+</script>
+</body>
+</html>

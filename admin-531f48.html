@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SND ROBOT — Admin</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:#0f0f0f; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
+  .topbar { background:#1a1a1a; border-bottom:1px solid #2a2a2a; padding:14px 16px; display:flex; justify-content:space-between; align-items:center; }
+  .topbar h1 { font-size:16px; color:#00c896; }
+  .topbar button { background:transparent; border:1px solid #444; color:#aaa; padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; }
+  .container { max-width:1100px; margin:24px auto; padding:0 12px; }
+  .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:20px 16px; margin-bottom:16px; }
+  .card h2 { font-size:13px; color:#aaa; margin-bottom:16px; text-transform:uppercase; letter-spacing:1px; }
+  .msg { margin-top:12px; font-size:13px; text-align:center; }
+  .err { color:#ff4d4d; } .ok { color:#00c896; }
+  .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  table { width:100%; border-collapse:collapse; font-size:12px; min-width:750px; }
+  th { text-align:left; color:#888; padding:8px 6px; border-bottom:1px solid #2a2a2a; white-space:nowrap; }
+  td { padding:8px 6px; border-bottom:1px solid #1e1e1e; color:#ddd; vertical-align:middle; }
+  .badge { padding:3px 8px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap; }
+  .badge.active { background:#00c89622; color:#00c896; }
+  .badge.inactive { background:#ff4d4d22; color:#ff4d4d; }
+  .badge.expired { background:#ff990022; color:#ff9900; }
+  .login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .login-card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; padding:32px 24px; width:100%; max-width:360px; }
+  .login-card h2 { color:#00c896; margin-bottom:20px; }
+  .login-card input { width:100%; padding:10px 14px; background:#111; border:1px solid #333; border-radius:8px; color:#fff; font-size:14px; margin-bottom:12px; outline:none; }
+  .login-card input:focus { border-color:#00c896; }
+  .btn-green { width:100%; padding:11px; background:#00c896; color:#000; font-weight:700; border:none; border-radius:8px; cursor:pointer; font-size:14px; }
+  .btn-green:hover { background:#00a87e; }
+  .btn-revoke { background:transparent; border:1px solid #ff4d4d; color:#ff4d4d; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:11px; white-space:nowrap; }
+  .btn-revoke:hover { background:#ff4d4d22; }
+  .btn-delete { background:#ff4d4d; border:none; color:#fff; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; white-space:nowrap; }
+  .btn-delete:hover { background:#cc2222; }
+  .btn-followup { background:transparent; border:1px solid #25d366; color:#25d366; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:11px; white-space:nowrap; }
+  .btn-followup:hover { background:#25d36622; }
+  .btn-followup-payment { background:transparent; border:1px solid #ff9900; color:#ff9900; padding:4px 8px; border-radius:6px; cursor:pointer; font-size:11px; white-space:nowrap; }
+  .btn-followup-payment:hover { background:#ff990022; }
+  .btn-grant { background:#00c896; border:none; color:#000; padding:4px 10px; border-radius:6px; cursor:pointer; font-size:11px; font-weight:700; white-space:nowrap; }
+  .btn-grant:hover { background:#00a87e; }
+  .row-select { background:#111; border:1px solid #333; border-radius:6px; color:#fff; font-size:11px; padding:4px 6px; outline:none; cursor:pointer; }
+  .row-select:focus { border-color:#00c896; }
+  .action-wrap { display:flex; gap:4px; align-items:center; flex-wrap:wrap; }
+  .grant-wrap { display:flex; gap:4px; align-items:center; }
+  .row-msg { font-size:11px; margin-top:2px; }
+
+    .btn-ib{background:#c9a84c;color:#0a0a0a;border:none;font-family:inherit;font-size:11px;font-weight:800;padding:7px 11px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
+    .btn-ib:hover{background:#e0be6a}
+    .btn-ib-accept{background:#25d366;color:#062a15;border:none;font-family:inherit;font-size:11px;font-weight:800;padding:7px 11px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
+    .btn-ib-accept:hover{filter:brightness(1.1)}
+    .btn-ib-reject{background:#1e1e1e;color:#888;border:1px solid #2a2a2a;font-family:inherit;font-size:11px;font-weight:700;padding:7px 11px;border-radius:7px;cursor:pointer;transition:.15s;white-space:nowrap}
+    .btn-ib-reject:hover{color:#e05c5c;border-color:#e05c5c}
+</style>
+</head>
+<body>
+<div id="loginWrap" class="login-wrap">
+  <div class="login-card">
+    <h2>Admin Login</h2>
+    <input type="password" id="adminPass" placeholder="Password admin">
+    <button class="btn-green" onclick="adminLogin()">Masuk</button>
+    <div class="msg err" id="loginMsg"></div>
+  </div>
+</div>
+
+<div id="adminPanel" style="display:none">
+<div class="topbar">
+  <h1>SND ROBOT — Admin</h1>
+  <button onclick="location.reload()">Logout</button>
+</div>
+<div class="container">
+  <div class="card">
+    <h2>Semua Member</h2>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Email</th>
+          <th>Nama</th>
+          <th>WA</th>
+          <th>Slot 1</th>
+          <th>Slot 2</th>
+          <th>Slot 3 (IB)</th>
+          <th>Expires</th>
+          <th>Status</th>
+          <th>Aktifkan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="memberTable"><tr><td colspan="10" style="color:#555">Loading...</td></tr></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// Kunci rahasia & password admin TIDAK ada di file ini.
+// Semua permintaan diteruskan ke /api/admin (server Vercel).
+
+function getPass() { return sessionStorage.getItem('adminPass') || ''; }
+
+async function api(action, extra) {
+  const res = await fetch('/api/admin', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(Object.assign({action:action, pass:getPass()}, extra || {}))
+  });
+  let data = {};
+  try { data = await res.json(); } catch(e) {}
+  return { ok: res.ok, status: res.status, data: data };
+}
+
+async function adminLogin() {
+  const pass = document.getElementById('adminPass').value;
+  const msg  = document.getElementById('loginMsg');
+  msg.textContent = 'Memeriksa...'; msg.className = 'msg';
+  const r = await api('login', {pass:pass});
+  if(r.ok) {
+    sessionStorage.setItem('adminPass', pass);
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadMembers();
+  } else {
+    msg.textContent = r.data.error || 'Password salah';
+    msg.className = 'msg err';
+  }
+}
+
+async function grantLicenseById(memberId, rowId) {
+  const days = parseInt(document.getElementById('dur_'+rowId).value);
+  const msgEl = document.getElementById('rowmsg_'+rowId);
+  msgEl.textContent = 'Loading...'; msgEl.style.color = '#aaa';
+
+  const r = await api('grant', {memberId:memberId, days:days});
+
+  if(r.ok) {
+    msgEl.textContent = 'Aktif!'; msgEl.style.color = '#00c896';
+    const badge = document.getElementById('badge_'+rowId);
+    if(badge) {
+      const isLifetime = days >= 36500;
+      const exp = new Date(); exp.setDate(exp.getDate() + days);
+      const expStr = isLifetime ? 'Lifetime' : exp.toLocaleDateString('id-ID');
+      badge.innerHTML = '<span class="badge active">AKTIF</span>';
+      const expCell = document.getElementById('exp_'+rowId);
+      if(expCell) expCell.textContent = expStr;
+    }
+  } else {
+    msgEl.textContent = r.data.error || 'Gagal';
+    msgEl.style.color = '#ff4d4d';
+  }
+  setTimeout(() => { msgEl.textContent = ''; }, 3000);
+}
+
+async function markIB(memberId, rowId) {
+  if(!confirm('Tandai member ini sebagai IB?\n\nDia akan dapat akses gratis (slot 3) setelah mengisi nomor akun dan kamu Accept.')) return;
+  const msgEl = document.getElementById('rowmsg_'+rowId);
+  if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
+  const r = await api('ibmark', { memberId });
+  if(r.ok){
+    if(msgEl){ msgEl.textContent='Ditandai IB ✓'; msgEl.style.color='#00c896'; }
+    setTimeout(loadMembers, 700);
+  } else {
+    if(msgEl){ msgEl.textContent = r.data.error || 'Gagal'; msgEl.style.color='#ff4d4d'; }
+  }
+}
+
+async function acceptIB(memberId, rowId) {
+  if(!confirm('Sudah kamu cek di portal IB HFM?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode IB kamu sebelum Accept.')) return;
+  const msgEl = document.getElementById('rowmsg_'+rowId);
+  if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
+  const r = await api('ibaccept', { memberId });
+  if(r.ok){
+    if(msgEl){ msgEl.textContent='Lisensi IB aktif ✓'; msgEl.style.color='#00c896'; }
+    setTimeout(loadMembers, 700);
+  } else {
+    if(msgEl){ msgEl.textContent = r.data.error || 'Gagal'; msgEl.style.color='#ff4d4d'; }
+  }
+}
+
+async function rejectIB(memberId, rowId) {
+  if(!confirm('Batalkan jalur IB untuk member ini?\n\nNomor akunnya akan dilepas dan dia kembali jadi pendaftar biasa.')) return;
+  const msgEl = document.getElementById('rowmsg_'+rowId);
+  if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
+  const r = await api('ibreject', { memberId });
+  if(r.ok){
+    if(msgEl){ msgEl.textContent='Dibatalkan'; msgEl.style.color='#888'; }
+    setTimeout(loadMembers, 700);
+  } else {
+    if(msgEl){ msgEl.textContent = r.data.error || 'Gagal'; msgEl.style.color='#ff4d4d'; }
+  }
+}
+
+async function loadMembers() {
+
+  const tbody = document.getElementById('memberTable');
+  tbody.innerHTML = '<tr><td colspan="10" style="color:#555">Loading...</td></tr>';
+
+  const r = await api('members');
+  if(!r.ok) {
+    tbody.innerHTML = '<tr><td colspan="10" style="color:#ff4d4d">Gagal memuat: ' + (r.data.error||'') + '</td></tr>';
+    if(r.status===401) { sessionStorage.removeItem('adminPass'); setTimeout(()=>location.reload(),1200); }
+    return;
+  }
+
+  const members  = r.data.users || [];
+  const licenses = r.data.licenses || [];
+
+  tbody.innerHTML = '';
+
+  members.forEach((m, idx) => {
+    const lics  = licenses.filter(l => l.member_id === m.id);
+    const lic1  = lics.find(l => l.slot === 1);
+    const lic2  = lics.find(l => l.slot === 2);
+    const now   = new Date();
+    const nama  = (m.user_metadata && m.user_metadata.nama) ? m.user_metadata.nama : '—';
+    const wa    = (m.user_metadata && m.user_metadata.wa)   ? m.user_metadata.wa   : '—';
+    const acc1  = lic1 ? (lic1.account_number || '—') : '—';
+    const acc2  = lic2 ? (lic2.account_number || '—') : '—';
+    const lic3  = lics.find(l => l.slot === 3);
+    const isIB  = !!lic3;
+    let ibCell  = '<span style="color:#555">—</span>';
+    let ibState = 'none';
+    if(lic3) {
+      if(lic3.is_active)          ibState = 'aktif';
+      else if(lic3.account_number) ibState = 'siap';
+      else                         ibState = 'kosong';
+      const lbl = ibState === 'aktif' ? 'AKTIF' : ibState === 'siap' ? 'SIAP ACC' : 'ISI AKUN';
+      const cls = ibState === 'aktif' ? 'active' : ibState === 'siap' ? 'expired' : 'inactive';
+      ibCell = `<span class="badge ${cls}">${lbl}</span>`;
+    }
+    let expStr = '—', statusHtml = '<span class="badge inactive">NO LICENSE</span>';
+    let isLifetime = false, statusKey = 'inactive';
+
+    if(lic1) {
+      const expDate = new Date(lic1.expires_at);
+      expStr = expDate.toLocaleDateString('id-ID');
+      isLifetime = (expDate - now) > (10 * 365 * 24 * 60 * 60 * 1000);
+      if(isLifetime) expStr = 'Lifetime';
+      statusKey = expDate < now ? 'expired' : lic1.is_active ? 'active' : 'inactive';
+      const label = statusKey === 'active' ? 'AKTIF' : statusKey === 'expired' ? 'EXPIRED' : 'NONAKTIF';
+      statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
+    }
+
+    const waClean     = wa.replace(/^0/, '62').replace(/\D/g, '');
+    const encodedNama = encodeURIComponent(nama);
+    const encodedExp  = encodeURIComponent(isLifetime ? 'Lifetime' : expStr);
+    const encodedStatus = encodeURIComponent(statusKey);
+    const rowId = 'r'+idx;
+
+    tbody.innerHTML += `<tr>
+      <td>${m.email}</td>
+      <td>${nama}</td>
+      <td>${wa}</td>
+      <td>${acc1}</td>
+      <td>${acc2}</td>
+      <td>${ibCell}${lic3 && lic3.account_number ? `<div style="font-family:monospace;font-size:11px;color:#888;margin-top:3px">${lic3.account_number}</div>` : ''}</td>
+      <td id="exp_${rowId}">${expStr}</td>
+      <td id="badge_${rowId}">${statusHtml}</td>
+      <td>
+        <div class="grant-wrap">
+          <select class="row-select" id="dur_${rowId}">
+            <option value="7">7 Hari</option>
+            <option value="30">1 Bulan</option>
+            <option value="90">3 Bulan</option>
+            <option value="180">6 Bulan</option>
+            <option value="365">1 Tahun</option>
+            <option value="36500">Lifetime</option>
+          </select>
+          <button class="btn-grant" onclick="grantLicenseById('${m.id}','${rowId}')">Aktifkan</button>
+        </div>
+        <div class="row-msg" id="rowmsg_${rowId}"></div>
+      </td>
+      <td>
+        <div class="action-wrap">
+          ${statusKey === 'active'
+            ? `<button class="btn-followup" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Aktif</button>`
+            : `<button class="btn-followup-payment" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Pembayaran</button>`
+          }
+          ${!isIB && (lic1 || lic2)
+            ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed" title="Sudah jalur berbayar">Jalur Berbayar</button>`
+            : !isIB
+              ? `<button class="btn-ib" onclick="markIB('${m.id}','${rowId}')">Centang IB</button>`
+              : ibState === 'aktif'
+                ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed">IB Aktif</button>`
+                : ibState === 'siap'
+                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
+                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
+                  : `<button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
+          }
+          <button class="btn-revoke" onclick="revokeLicense('${m.id}')">Revoke</button>
+          <button class="btn-delete" onclick="deleteMember('${m.id}','${m.email}')">Hapus</button>
+        </div>
+      </td>
+    </tr>`;
+  });
+}
+
+function followUp(waNumber, namaEnc, expEnc, statusEnc) {
+  const nama   = decodeURIComponent(namaEnc);
+  const exp    = decodeURIComponent(expEnc);
+  const status = decodeURIComponent(statusEnc);
+
+  if(!waNumber || waNumber.length < 8) {
+    alert('Nomor WhatsApp member tidak tersedia.');
+    return;
+  }
+
+  let pesanStatus = '';
+  if(status === 'active') {
+    pesanStatus = exp === 'Lifetime'
+      ? `Lisensi kamu sudah aktif hingga: *LIFETIME*`
+      : `Lisensi kamu sudah aktif hingga: *${exp}*`;
+  } else if(status === 'expired') {
+    pesanStatus = `Lisensi kamu sudah *expired* pada ${exp}. Silakan hubungi kami untuk perpanjangan.`;
+  } else {
+    pesanStatus = `Lisensi kamu belum aktif. Silakan hubungi kami untuk informasi lebih lanjut.`;
+  }
+
+  const pesan = `Halo *${nama}*,
+
+Kami dari *SND ROBOT* ingin menginfokan update lisensi EA kamu.
+
+${pesanStatus}
+
+*Langkah selanjutnya:*
+1. Login ke dashboard: https://mrr-trader-license.vercel.app/login.html
+2. Masukkan nomor akun MT5 kamu
+3. Install EA di MT5 dan mulai trading sesuai rules
+
+Jika ada pertanyaan atau kendala, jangan ragu untuk chat di sini ya. Kami siap membantu.
+
+Salam,
+*SND ROBOT Support*`;
+
+  window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`, '_blank');
+}
+
+async function deleteMember(memberId, email) {
+  if(!confirm(`Hapus akun "${email}" secara permanen?\n\nAkun + lisensi akan dihapus dan tidak bisa dikembalikan.`)) return;
+  const r = await api('delete', {memberId:memberId});
+  if(r.ok) { alert('Akun berhasil dihapus.'); loadMembers(); }
+  else { alert('Gagal hapus akun: ' + (r.data.error||'')); }
+}
+
+async function revokeLicense(memberId) {
+  if(!confirm('Revoke lisensi member ini? EA akan berhenti saat cek berikutnya.')) return;
+  const r = await api('revoke', {memberId:memberId});
+  if(r.ok) { alert('Lisensi berhasil di-revoke!'); loadMembers(); }
+  else { alert('Gagal revoke: ' + (r.data.error||'')); }
+}
+
+// Auto-login kalau password masih ada di sesi tab ini
+(function(){
+  if(sessionStorage.getItem('adminPass')) {
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminPanel').style.display = 'block';
+    loadMembers();
+  }
+})();
+</script>
+</body>
+</html>
