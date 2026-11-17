@@ -305,7 +305,14 @@ async function loadMembers() {
             <option value="365">1 Tahun</option>
             <option value="36500">Lifetime</option>
           </select>
-          <button class="btn-grant" onclick="grantLicenseById('${m.id}','${rowId}')">Aktifkan</button>
+          ${isIB
+            ? (ibState === 'aktif' || ibState === 'kedaluwarsa')
+              ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Perpanjang IB</button>`
+              : ibState === 'siap'
+                ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>`
+                : `<button class="btn-grant" disabled style="opacity:.5;cursor:not-allowed">Isi Nomor Dulu</button>`
+            : `<button class="btn-grant" onclick="grantLicenseById('${m.id}','${rowId}')">Aktifkan</button>`
+          }
         </div>
         <div class="row-msg" id="rowmsg_${rowId}"></div>
       </td>
@@ -319,16 +326,12 @@ async function loadMembers() {
             ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed" title="Sudah jalur berbayar">Jalur Berbayar</button>`
             : !isIB
               ? `<button class="btn-ib" onclick="markIB('${m.id}','${rowId}')">Centang IB</button>`
-              : ibState === 'aktif'
-                ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed">IB Aktif</button>`
-                : ibState === 'kedaluwarsa'
-                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Perpanjang IB</button>
-                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan</button>`
+              : ibState === 'kosong'
+                ? `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
+                   <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
                 : ibState === 'siap'
-                  ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
-                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
-                  : `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
-                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
+                  ? `<button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
+                  : `<button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
           }
           <button class="btn-revoke" onclick="revokeLicense('${m.id}')">Revoke</button>
           <button class="btn-delete" onclick="deleteMember('${m.id}','${m.email}')">Hapus</button>

@@ -92,6 +92,20 @@ module.exports = async (req, res) => {
         return res.status(400).json({ error: 'Data tidak lengkap' });
       }
 
+      // PENGAMAN: member jalur IB tidak boleh di-Aktifkan lewat jalur berbayar.
+      // Kalau ini terjadi, tombol "Perpanjang IB" jadi tidak berguna dan
+      // data jadi kacau (dua jalur aktif sekaligus).
+      const cekIb = await fetch(
+        `${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=eq.3&select=slot`,
+        { headers: H }
+      );
+      const adaIb = await cekIb.json();
+      if (Array.isArray(adaIb) && adaIb.length > 0) {
+        return res.status(409).json({
+          error: 'Member ini jalur IB. Pakai tombol "Verifikasi & Accept" / "Perpanjang IB", bukan "Aktifkan".'
+        });
+      }
+
       const expires = new Date();
       expires.setDate(expires.getDate() + days);
       const iso = expires.toISOString();
