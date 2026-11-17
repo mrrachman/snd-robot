@@ -180,8 +180,9 @@ async function loadLicense() {
     const now  = new Date();
 
     /* ---------- STATUS LISENSI (berlaku untuk SEMUA jalur) ---------- */
-    // Ambil lisensi yang berlaku: slot 1/2 kalau ada, kalau tidak slot 3 (IB).
-    const licMain = lic1 || lic2 || lic3;
+    // Ambil lisensi yang berlaku: kalau member jalur IB (ada slot 3), pakai slot 3.
+    // Kalau bukan, pakai slot berbayar 1/2.
+    const licMain = lic3 || lic1 || lic2;
     if(licMain) {
       const exp        = new Date(licMain.expires_at);
       const isExpired  = exp < now;
