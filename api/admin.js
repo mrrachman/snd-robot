@@ -202,6 +202,32 @@ module.exports = async (req, res) => {
       return res.status(200).json({ ok: true });
     }
 
+    // ---------- isi nomor akun IB (diisi admin) ----------
+    if (action === 'ibset') {
+      const memberId = body.memberId;
+      const acc      = parseInt(body.accountNumber, 10);
+      if (!memberId || !acc || acc < 100000) {
+        return res.status(400).json({ error: 'Nomor akun tidak valid (minimal 6 digit)' });
+      }
+
+      const cek = await fetch(
+        `${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=eq.3&select=id`,
+        { headers: H }
+      );
+      const ada = await cek.json();
+      if (!Array.isArray(ada) || ada.length === 0) {
+        return res.status(409).json({ error: 'Member ini belum ditandai IB' });
+      }
+
+      const r = await fetch(`${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=eq.3`, {
+        method: 'PATCH',
+        headers: H,
+        body: JSON.stringify({ account_number: acc, activated_at: new Date().toISOString() }),
+      });
+      if (!r.ok) return res.status(502).json({ error: 'Gagal simpan nomor akun' });
+      return res.status(200).json({ ok: true });
+    }
+
     // ---------- revoke lisensi ----------
     if (action === 'revoke') {
       const memberId = body.memberId;

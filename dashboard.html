@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MRR Trader — Dashboard</title>
+<title>SND ROBOT — Dashboard Member</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body { background:#0f0f0f; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
@@ -84,7 +84,7 @@
         Lisensi akan diaktifkan oleh admin setelah pembayaran dikonfirmasi.<br><br>
         Hubungi kami via WhatsApp untuk konfirmasi pembayaran dan aktivasi lisensi.
       </div>
-      <a class="btn-wa" href="https://wa.me/6282344444399?text=Halo%2C%20saya%20sudah%20daftar%20MRR%20Tools%20dan%20ingin%20konfirmasi%20pembayaran." target="_blank">
+      <a class="btn-wa" href="https://wa.me/6282344444399?text=Halo%2C%20saya%20sudah%20daftar%20SND%20ROBOT%20dan%20ingin%20konfirmasi%20pembayaran." target="_blank">
         Chat WhatsApp
       </a>
     </div>
@@ -114,8 +114,8 @@
 </div>
 
   <div class="card" id="ibCard" style="display:none">
-    <h2>Akses Gratis via IB</h2>
-    <div class="info-row"><span class="lbl">Jalur</span><span class="val"><span class="badge active">IB 30586718</span></span></div>
+    <h2>Akses Gratis via Vantage</h2>
+    <div class="info-row"><span class="lbl">Jalur</span><span class="val"><span class="badge active">IB mrrsnd88</span></span></div>
     <div class="info-row"><span class="lbl">Status</span><span class="val" id="ibStatus">—</span></div>
     <div class="slot-box" id="ibInputBox" style="display:none">
       <h3>Nomor Akun Trading</h3>
@@ -187,29 +187,34 @@ async function loadLicense() {
       const ibIn   = document.getElementById('ibInputBox');
       const ibLk   = document.getElementById('ibLockedRow');
       const ibNote = document.getElementById('ibNote');
+      const dlR    = document.getElementById('ibDlRow');
+      const wrR    = document.getElementById('ibWrRow');
+
+      // Admin sudah klik Aktifkan → member bisa input nomor sendiri
       if(lic3.is_active) {
-        ibStat.innerHTML = '<span class="badge active">AKTIF</span>';
-        ibIn.style.display = 'none';
-        ibLk.style.display = 'flex';
-        document.getElementById('ibAccLocked').textContent = lic3.account_number || '—';
-        ibNote.innerHTML = 'Lisensi IB kamu <b style="color:#00c896">aktif selamanya</b> selama akun tetap terdaftar di bawah IB <b>30586718</b>.<br><br>Nomor akun <b>terkunci</b> — hubungi admin kalau perlu diubah.';
-        // tampilkan download EA + WebRequest
-        const dlR = document.getElementById('ibDlRow');
-        const wrR = document.getElementById('ibWrRow');
+        const sudahAdaNomor = !!lic3.account_number;
+        if(!sudahAdaNomor) {
+          ibStat.innerHTML = '<span class="badge expired">SIAP DIISI</span>';
+          ibIn.style.display = 'block';
+          ibLk.style.display = 'none';
+          ibNote.innerHTML = 'Akses kamu sudah dibuka oleh admin.<br><br>Masukkan <b>nomor akun trading</b> kamu di bawah ini.<br><br>Belum punya akun? Daftar lewat <a href="https://vigco.co/la-s1com-inv/id/mrrsnd88" target="_blank" style="color:#00c896;font-weight:700">link Vantage ini</a> supaya tercatat di bawah kode referral <b>mrrsnd88</b>.';
+        } else {
+          ibStat.innerHTML = '<span class="badge active">AKTIF</span>';
+          ibIn.style.display = 'none';
+          ibLk.style.display = 'flex';
+          document.getElementById('ibAccLocked').textContent = lic3.account_number;
+          ibNote.innerHTML = 'Lisensi kamu <b style="color:#00c896">aktif</b>. Nomor akun <b>terkunci</b> — hubungi admin kalau perlu diubah.';
+        }
         dlR.style.display = 'flex';
         wrR.style.display = 'flex';
         document.getElementById('ibWrUrl').textContent = SUPA_URL;
-      } else if(lic3.account_number) {
-        ibStat.innerHTML = '<span class="badge expired">MENUNGGU VERIFIKASI</span>';
-        ibIn.style.display = 'none';
-        ibLk.style.display = 'flex';
-        document.getElementById('ibAccLocked').textContent = lic3.account_number;
-        ibNote.innerHTML = 'Nomor akun kamu sudah terkirim. Admin sedang memverifikasi di portal IB.<br><br>Kamu akan bisa memakai EA setelah admin menyetujui.';
       } else {
-        ibStat.innerHTML = '<span class="badge inactive">ISI NOMOR AKUN</span>';
-        ibIn.style.display = 'block';
+        ibStat.innerHTML = '<span class="badge inactive">MENUNGGU AKTIVASI ADMIN</span>';
+        ibIn.style.display = 'none';
         ibLk.style.display = 'none';
-        ibNote.innerHTML = 'Isi nomor akun trading kamu di bawah ini.<br><br>Pastikan akun itu sudah terdaftar di bawah kode IB <b>30586718</b>. Nomor <b>tidak bisa diganti</b> setelah disetujui admin.';
+        dlR.style.display = 'none';
+        wrR.style.display = 'none';
+        ibNote.innerHTML = 'Akun kamu sudah ditandai <b>jalur IB</b>.<br><br>Tunggu admin mengaktifkan, lalu kamu bisa langsung mengisi nomor akun trading dan men-download EA.';
       }
       dlRow.style.display='none'; wrRow.style.display='none';
       slotsCard.style.display='none'; pendingCard.style.display='none';

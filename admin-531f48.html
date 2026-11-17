@@ -166,8 +166,25 @@ async function markIB(memberId, rowId) {
   }
 }
 
+function setIBAccount(memberId, rowId) {
+  const input = prompt('Masukkan nomor akun MT5 member ini (angka saja):');
+  if(!input) return;
+  const acc = parseInt(input.replace(/\D/g,''), 10);
+  if(!acc || acc < 100000) { alert('Nomor akun tidak valid. Minimal 6 digit angka.'); return; }
+  const msgEl = document.getElementById('rowmsg_'+rowId);
+  if(msgEl){ msgEl.textContent='Menyimpan...'; msgEl.style.color='#888'; }
+  api('ibset', { memberId, accountNumber: acc }).then(r => {
+    if(r.ok){
+      if(msgEl){ msgEl.textContent='Nomor akun tersimpan ✓'; msgEl.style.color='#00c896'; }
+      setTimeout(loadMembers, 700);
+    } else {
+      if(msgEl){ msgEl.textContent = r.data.error || 'Gagal'; msgEl.style.color='#ff4d4d'; }
+    }
+  });
+}
+
 async function acceptIB(memberId, rowId) {
-  if(!confirm('Sudah kamu cek di portal IB HFM?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode IB kamu sebelum Accept.')) return;
+  if(!confirm('Sudah kamu cek di portal IB Vantage?\n\nPastikan nomor akun benar-benar terdaftar di bawah kode referral mrrsnd88 sebelum Accept.')) return;
   const msgEl = document.getElementById('rowmsg_'+rowId);
   if(msgEl){ msgEl.textContent='Memproses...'; msgEl.style.color='#888'; }
   const r = await api('ibaccept', { memberId });
@@ -287,7 +304,8 @@ async function loadMembers() {
                 : ibState === 'siap'
                   ? `<button class="btn-ib-accept" onclick="acceptIB('${m.id}','${rowId}')">Verifikasi &amp; Accept</button>
                      <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Tolak</button>`
-                  : `<button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
+                  : `<button class="btn-ib" onclick="setIBAccount('${m.id}','${rowId}')">Isi Nomor Akun</button>
+                     <button class="btn-ib-reject" onclick="rejectIB('${m.id}','${rowId}')">Batalkan IB</button>`
           }
           <button class="btn-revoke" onclick="revokeLicense('${m.id}')">Revoke</button>
           <button class="btn-delete" onclick="deleteMember('${m.id}','${m.email}')">Hapus</button>
