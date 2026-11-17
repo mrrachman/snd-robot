@@ -125,14 +125,19 @@ module.exports = async (req, res) => {
       const memberId = body.memberId;
       if (!memberId) return res.status(400).json({ error: 'Data tidak lengkap' });
 
-      // tolak kalau sudah punya slot 1/2 (1 member 1 jalur)
+      // Member boleh berpindah ke jalur IB kapan saja (1 member 1 jalur):
+      // slot berbayar dimatikan otomatis supaya tidak dobel jalur.
       const cek = await fetch(
-        `${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=in.(1,2)&select=slot`,
+        `${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=in.(1,2)`,
         { headers: H }
       );
       const ada = await cek.json();
       if (Array.isArray(ada) && ada.length > 0) {
-        return res.status(409).json({ error: 'Member ini sudah jalur berbayar' });
+        await fetch(`${SUPA_URL}/rest/v1/licenses?member_id=eq.${memberId}&slot=in.(1,2)`, {
+          method: 'PATCH',
+          headers: H,
+          body: JSON.stringify({ is_active: false, account_number: null }),
+        });
       }
 
       // tolak kalau sudah ditandai IB

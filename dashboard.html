@@ -190,31 +190,34 @@ async function loadLicense() {
       const dlR    = document.getElementById('ibDlRow');
       const wrR    = document.getElementById('ibWrRow');
 
-      // Admin sudah klik Aktifkan → member bisa input nomor sendiri
+      // Alur seperti MRR:
+      //   belum ada nomor  -> member isi sendiri
+      //   sudah ada nomor  -> menunggu verifikasi admin
+      //   sudah aktif      -> nomor terkunci + tombol download
       if(lic3.is_active) {
-        const sudahAdaNomor = !!lic3.account_number;
-        if(!sudahAdaNomor) {
-          ibStat.innerHTML = '<span class="badge expired">SIAP DIISI</span>';
-          ibIn.style.display = 'block';
-          ibLk.style.display = 'none';
-          ibNote.innerHTML = 'Akses kamu sudah dibuka oleh admin.<br><br>Masukkan <b>nomor akun trading</b> kamu di bawah ini.<br><br>Belum punya akun? Daftar lewat <a href="https://vigco.co/la-s1com-inv/id/mrrsnd88" target="_blank" style="color:#00c896;font-weight:700">link Vantage ini</a> supaya tercatat di bawah kode referral <b>mrrsnd88</b>.';
-        } else {
-          ibStat.innerHTML = '<span class="badge active">AKTIF</span>';
-          ibIn.style.display = 'none';
-          ibLk.style.display = 'flex';
-          document.getElementById('ibAccLocked').textContent = lic3.account_number;
-          ibNote.innerHTML = 'Lisensi kamu <b style="color:#00c896">aktif</b>. Nomor akun <b>terkunci</b> — hubungi admin kalau perlu diubah.';
-        }
+        ibStat.innerHTML = '<span class="badge active">AKTIF</span>';
+        ibIn.style.display = 'none';
+        ibLk.style.display = 'flex';
+        document.getElementById('ibAccLocked').textContent = lic3.account_number || '—';
+        ibNote.innerHTML = 'Lisensi kamu <b style="color:#00c896">aktif</b>. Nomor akun <b>terkunci</b> — hubungi admin kalau perlu diubah.';
         dlR.style.display = 'flex';
         wrR.style.display = 'flex';
         document.getElementById('ibWrUrl').textContent = SUPA_URL;
-      } else {
-        ibStat.innerHTML = '<span class="badge inactive">MENUNGGU AKTIVASI ADMIN</span>';
+      } else if(lic3.account_number) {
+        ibStat.innerHTML = '<span class="badge expired">MENUNGGU VERIFIKASI</span>';
         ibIn.style.display = 'none';
-        ibLk.style.display = 'none';
+        ibLk.style.display = 'flex';
+        document.getElementById('ibAccLocked').textContent = lic3.account_number;
+        ibNote.innerHTML = 'Nomor akun kamu sudah terkirim. Admin sedang memverifikasi.<br><br>Download EA &amp; WebRequest akan muncul setelah disetujui.';
         dlR.style.display = 'none';
         wrR.style.display = 'none';
-        ibNote.innerHTML = 'Akun kamu sudah ditandai <b>jalur IB</b>.<br><br>Tunggu admin mengaktifkan, lalu kamu bisa langsung mengisi nomor akun trading dan men-download EA.';
+      } else {
+        ibStat.innerHTML = '<span class="badge inactive">ISI NOMOR AKUN</span>';
+        ibIn.style.display = 'block';
+        ibLk.style.display = 'none';
+        ibNote.innerHTML = 'Masukkan <b>nomor akun trading</b> kamu di bawah ini.<br><br>Belum punya akun? Daftar lewat <a href="https://vigco.co/la-s1com-inv/id/mrrsnd88" target="_blank" style="color:#00c896;font-weight:700">link Vantage ini</a> supaya tercatat di bawah kode referral <b>mrrsnd88</b>.<br><br>Nomor <b>tidak bisa diganti</b> setelah admin menyetujui.';
+        dlR.style.display = 'none';
+        wrR.style.display = 'none';
       }
       dlRow.style.display='none'; wrRow.style.display='none';
       slotsCard.style.display='none'; pendingCard.style.display='none';
