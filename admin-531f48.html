@@ -254,16 +254,10 @@ async function loadMembers() {
     let expStr = '—', statusHtml = '<span class="badge inactive">NO LICENSE</span>';
     let isLifetime = false, statusKey = 'inactive';
 
-    if(lic1) {
-      const expDate = new Date(lic1.expires_at);
-      expStr = expDate.toLocaleDateString('id-ID');
-      isLifetime = (expDate - now) > (10 * 365 * 24 * 60 * 60 * 1000);
-      if(isLifetime) expStr = 'Lifetime';
-      statusKey = expDate < now ? 'expired' : lic1.is_active ? 'active' : 'inactive';
-      const label = statusKey === 'active' ? 'AKTIF' : statusKey === 'expired' ? 'EXPIRED' : 'NONAKTIF';
-      statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
-    } else if(lic3 && lic3.is_active) {
-      // jalur IB — tampilkan tanggal berakhirnya (bukan lifetime)
+    // Status utama: pakai lisensi yang BENAR-BENAR aktif.
+    // Jalur IB (slot 3) diprioritaskan karena slot 1/2 di-nonaktifkan saat pindah jalur.
+    const lic3Active = !!(lic3 && lic3.is_active);
+    if(lic3Active) {
       const ibExp = new Date(lic3.expires_at);
       expStr = ibExp.toLocaleDateString('id-ID');
       isLifetime = (ibExp - now) > (10 * 365 * 24 * 60 * 60 * 1000);
@@ -271,6 +265,19 @@ async function loadMembers() {
       statusKey = ibExp < now ? 'expired' : 'active';
       const label = statusKey === 'active' ? 'AKTIF (IB)' : 'EXPIRED (IB)';
       statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
+    } else if(lic1 && lic1.is_active) {
+      const expDate = new Date(lic1.expires_at);
+      expStr = expDate.toLocaleDateString('id-ID');
+      isLifetime = (expDate - now) > (10 * 365 * 24 * 60 * 60 * 1000);
+      if(isLifetime) expStr = 'Lifetime';
+      statusKey = expDate < now ? 'expired' : 'active';
+      const label = statusKey === 'active' ? 'AKTIF' : 'EXPIRED';
+      statusHtml = `<span class="badge ${statusKey}">${label}</span>`;
+    } else if(lic1) {
+      // ada baris tapi tidak aktif -> belum berlangganan
+      expStr = '—';
+      statusKey = 'inactive';
+      statusHtml = `<span class="badge inactive">NONAKTIF</span>`;
     }
 
     const waClean     = wa.replace(/^0/, '62').replace(/\D/g, '');
