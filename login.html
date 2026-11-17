@@ -59,7 +59,14 @@ async function doLogin() {
     localStorage.setItem('email', email);
     window.location.href = 'dashboard.html';
   } else {
-    msg.textContent = data.error_description || 'Login gagal';
+    const m = String(data.error_description || data.msg || data.error || '');
+    if (/confirm|verif|not confirmed/i.test(m)) {
+      msg.innerHTML = 'Akun kamu belum aktif. Hubungi admin di <a href="https://wa.me/6282344444399" target="_blank" style="color:#00c896;">WhatsApp</a> untuk diaktifkan.';
+    } else if (/invalid/i.test(m)) {
+      msg.textContent = 'Email atau password salah. Cek lagi huruf besar/kecil dan tanda titik.';
+    } else {
+      msg.textContent = m || 'Login gagal. Coba lagi.';
+    }
     msg.className = 'msg err';
   }
 }

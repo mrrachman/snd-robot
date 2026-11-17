@@ -55,25 +55,24 @@ async function doRegister() {
 
   msg.textContent = 'Loading...'; msg.className = 'msg';
 
-  const res = await fetch(`${SUPA_URL}/auth/v1/signup`, {
+  // Daftar lewat server: akun langsung aktif, tanpa perlu klik email konfirmasi
+  const res = await fetch('/api/register', {
     method:'POST',
-    headers:{'Content-Type':'application/json','apikey':SUPA_KEY},
-    body: JSON.stringify({
-      email, password:pass,
-      data: { nama, wa }
-    })
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ nama, wa, email, pass })
   });
-  const data = await res.json();
-  if(data.id || data.user) {
+  let data = {};
+  try { data = await res.json(); } catch(e) {}
+  if(res.ok && data.ok) {
     msg.innerHTML = `
-      <div style="color:#00c896;margin-bottom:16px;">Pendaftaran berhasil!</div>
+      <div style="color:#00c896;margin-bottom:16px;">Pendaftaran berhasil! Akun langsung aktif — silakan login.</div>
       <a href="login.html" style="display:block;padding:10px;background:#00c896;color:#000;font-weight:700;border-radius:8px;text-decoration:none;margin-bottom:10px;">Login Sekarang</a>
-      <a href="https://wa.me/6282344444399?text=${encodeURIComponent(`Halo Admin, saya *${nama}* (${email}) sudah mendaftar MRR Tools. Mohon aktivasi lisensi saya. Terima kasih.`)}" target="_blank" style="display:block;padding:10px;background:#25d366;color:#000;font-weight:700;border-radius:8px;text-decoration:none;">Chat WhatsApp Admin</a>
+      <a href="https://wa.me/6282344444399?text=${encodeURIComponent(`Halo Admin, saya *${nama}* (${email}) sudah mendaftar SND ROBOT. Mohon aktivasi lisensi saya. Terima kasih.`)}" target="_blank" style="display:block;padding:10px;background:#25d366;color:#000;font-weight:700;border-radius:8px;text-decoration:none;">Chat WhatsApp Admin</a>
     `;
     msg.className = 'msg';
     document.querySelector('button').style.display = 'none';
   } else {
-    msg.textContent = data.msg || data.error_description || 'Gagal mendaftar';
+    msg.textContent = data.error || 'Gagal mendaftar';
     msg.className = 'msg err';
   }
 }

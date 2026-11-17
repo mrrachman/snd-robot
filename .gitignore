@@ -9,3 +9,7 @@ node_modules/
 config.json
 *.ex5
 !EA/*.ex5
+.env*
+
+.hermes-tmp*
+supabase/.temp/
