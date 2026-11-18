@@ -371,19 +371,19 @@ function followUp(waNumber, namaEnc, expEnc, statusEnc) {
 
   const pesan = `Halo *${nama}*,
 
-Kami dari *SND ROBOT* ingin menginfokan update lisensi EA kamu.
+Kami dari *Robot SND MRR* ingin menginfokan update lisensi EA kamu.
 
 ${pesanStatus}
 
 *Langkah selanjutnya:*
-1. Login ke dashboard: https://mrr-trader-license.vercel.app/login.html
+1. Login ke dashboard: https://snd-robot.vercel.app/login.html
 2. Masukkan nomor akun MT5 kamu
-3. Install EA di MT5 dan mulai trading sesuai rules
+3. Download EA dan install di MT5, lalu mulai trading sesuai rules
 
 Jika ada pertanyaan atau kendala, jangan ragu untuk chat di sini ya. Kami siap membantu.
 
 Salam,
-*SND ROBOT Support*`;
+*Robot SND MRR Support*`;
 
   window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`, '_blank');
 }
