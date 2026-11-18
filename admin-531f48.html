@@ -324,9 +324,11 @@ async function loadMembers() {
       </td>
       <td>
         <div class="action-wrap">
-          ${statusKey === 'active'
-            ? `<button class="btn-followup" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Aktif</button>`
-            : `<button class="btn-followup-payment" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Pembayaran</button>`
+          ${isIB
+            ? `<button class="btn-followup" onclick="followUpIB('${waClean}','${encodedNama}','${encodedExp}','${ibState}')">Kirim Panduan IB</button>`
+            : (statusKey === 'active'
+                ? `<button class="btn-followup" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Aktif</button>`
+                : `<button class="btn-followup-payment" onclick="followUp('${waClean}','${encodedNama}','${encodedExp}','${encodedStatus}')">Follow Up Pembayaran</button>`)
           }
           ${!isIB && bayarAktif
             ? `<button class="btn-followup" disabled style="opacity:.5;cursor:not-allowed" title="Sudah jalur berbayar">Jalur Berbayar</button>`
@@ -346,6 +348,82 @@ async function loadMembers() {
       </td>
     </tr>`;
   });
+}
+
+// Pesan untuk member JALUR IB: konfirmasi aktif + panduan langkah sampai WebRequest.
+function followUpIB(waNumber, namaEnc, expEnc, ibStateEnc) {
+  const nama   = decodeURIComponent(namaEnc);
+  const exp    = decodeURIComponent(expEnc);
+  const ibState = decodeURIComponent(ibStateEnc);
+
+  if(!waNumber || waNumber.length < 8) {
+    alert('Nomor WhatsApp member tidak tersedia.');
+    return;
+  }
+
+  const aktif = (ibState === 'aktif' || ibState === 'kedaluwarsa');
+
+  const pesan = aktif
+? `Halo *${nama}*,
+
+Selamat! Akses *gratis* kamu untuk *Robot SND MRR* sudah *AKTIF* ✅
+Aktif sampai: *${exp}*
+
+Berikut cara pakainya, ikuti urutannya ya:
+
+*1. Download EA*
+Login ke dashboard, lalu klik tombol *Download*:
+https://snd-robot.vercel.app/dashboard.html
+
+*2. Izinkan WebRequest di MT5 (WAJIB)*
+Tanpa langkah ini EA tidak bisa cek lisensi dan tidak akan jalan.
+• Buka MT5 → menu *Tools* → *Options*
+• Pilih tab *Expert Advisors*
+• Centang *Allow WebRequest for listed URL*
+• Tempel alamat ini, lalu klik OK:
+${'https://nkeytmarkudwzilkmfde.supabase.co'}
+
+*3. Pasang EA di chart*
+• Buka chart *XAUUSD* (timeframe bebas, disarankan M5)
+• Drag file EA dari panel *Navigator* ke chart
+• Tab *Common* → centang *Allow Algo Trading*
+• Klik OK
+
+*4. Nyalakan AutoTrading*
+Klik tombol *Algo Trading* di toolbar MT5 sampai menyala hijau.
+
+*5. Cek status*
+Kalau berhasil, di tab *Experts* akan muncul tulisan:
+"Robot SND MRR License: akun (nomor akunmu) terverifikasi"
+
+*Penting:*
+• Jangan ganti nomor akun — lisensi terkunci di akun yang sudah terdaftar
+• Tetap terdaftar di bawah kode referral *mrrsnd88* supaya akses diperbarui berkala
+• Masih bingung? Chat saya di sini, saya bantu sampai jalan
+
+Salam,
+*Robot SND MRR Support*`
+: `Halo *${nama}*,
+
+Kamu sedang mendaftar akses *gratis* Robot SND MRR via jalur IB.
+Status kamu saat ini: *${ibState === 'siap' ? 'menunggu verifikasi admin' : 'belum isi nomor akun'}*
+
+*Langkah kamu sekarang:*
+*1.* Daftar akun trading lewat link ini:
+https://vigco.co/la-s1com-inv/id/mrrsnd88
+(kode referral: *mrrsnd88*)
+
+*2.* Login ke dashboard, lalu isi *nomor akun MT5* kamu:
+https://snd-robot.vercel.app/dashboard.html
+
+*3.* Setelah saya verifikasi, akses langsung aktif dan kamu bisa download EA.
+
+Kalau sudah selesai daftar, kabari saya di sini ya — saya cek dan langsung aktifkan.
+
+Salam,
+*Robot SND MRR Support*`;
+
+  window.open(`https://wa.me/${waNumber}?text=${encodeURIComponent(pesan)}`, '_blank');
 }
 
 function followUp(waNumber, namaEnc, expEnc, statusEnc) {
