@@ -362,6 +362,10 @@ function followUpIB(waNumber, namaEnc, expEnc, ibStateEnc) {
   }
 
   const aktif = (ibState === 'aktif' || ibState === 'kedaluwarsa');
+  const seumurHidup = (exp === 'Lifetime');
+  const barisPerpanjang = seumurHidup
+    ? '• Akses kamu berlaku selamanya — tetap terdaftar di bawah kode *mrrsnd88* ya'
+    : '• Tetap terdaftar di bawah kode referral *mrrsnd88* supaya akses diperbarui berkala';
 
   const pesan = aktif
 ? `Halo *${nama}*,
@@ -381,7 +385,7 @@ Tanpa langkah ini EA tidak bisa cek lisensi dan tidak akan jalan.
 • Pilih tab *Expert Advisors*
 • Centang *Allow WebRequest for listed URL*
 • Tempel alamat ini, lalu klik OK:
-${'https://nkeytmarkudwzilkmfde.supabase.co'}
+https://nkeytmarkudwzilkmfde.supabase.co
 
 *3. Pasang EA di chart*
 • Buka chart *XAUUSD* (timeframe bebas, disarankan M5)
@@ -398,7 +402,7 @@ Kalau berhasil, di tab *Experts* akan muncul tulisan:
 
 *Penting:*
 • Jangan ganti nomor akun — lisensi terkunci di akun yang sudah terdaftar
-• Tetap terdaftar di bawah kode referral *mrrsnd88* supaya akses diperbarui berkala
+${barisPerpanjang}
 • Masih bingung? Chat saya di sini, saya bantu sampai jalan
 
 Salam,
